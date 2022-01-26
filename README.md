@@ -5,7 +5,7 @@ more than implementation of netcat  🐱‍👤🔥
 ## Featutres 💻
 
 - [ ] core written in `C`
-- [ ] TCP & UDP
+- [X] TCP & UDP
 - [ ] Backdoor (Reverse Shell)
 - [ ] Honeypot
 - [ ] File transfer

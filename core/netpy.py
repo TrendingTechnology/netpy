@@ -5,6 +5,7 @@ import threading
 import time
 from pymitter import EventEmitter
 
+from .constants import *
 
 class NetPy(EventEmitter):
     def __init__(self):
@@ -12,6 +13,7 @@ class NetPy(EventEmitter):
         self.port = 0
         self.ports = []
         self.ip = "0.0.0.0"
+        self.method = ScanMethod.TCP
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.BUFFER_SIZE = 1024
         self.process = None
@@ -33,26 +35,52 @@ class NetPy(EventEmitter):
     def set_ip(self, ip: str):
         self.ip = ip
 
-    def set_timeout(self, timeout: bool):
+    def set_timeout(self, timeout=0.5):
         self.timeout = timeout
+        self.socket.settimeout(timeout)
 
     def set_verbose(self, verbose: bool):
         self.verbose = verbose
 
     def set_udp(self, udp: bool):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if udp:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.socket.settimeout(self.timeout)
+            self.method = ScanMethod.UDP
 
     def set_prog(self):
         self.process = subprocess.Popen(['C:\\Windows\\system32\\cmd.exe'])
 
     def _scan(self, ports, port):
-        result = self.socket.connect_ex((self.ip, port))
-        if result == 0:
-            ports.append({"port": port,"stat": "opened"})
-            self.emit("scan", {"port": port, "stat": "opened"})
-        else:
-            ports.append({"port": port,"stat": "closed"})
-            self.emit("scan", {"port": port, "stat": "closed"})
+        result = {"port": port,"stat": ScanStatus.FILTERED}
+        try:
+            self.socket.connect((self.ip, port))
+            if self.method == ScanMethod.UDP:
+                self.socket.send(bytes(0))
+                self.socket.recv(1024)
+
+            result["stat"] = ScanStatus.OPEN
+            ports.append(result)
+            self.emit("scan", result)
+
+        except socket.timeout:
+            if self.method == ScanMethod.UDP:
+                result["stat"] = ScanStatus.OPEN_FILTERED
+            elif self.method == ScanMethod.TCP:
+                result["stat"] = ScanStatus.FILTERED
+            ports.append(result)
+            self.emit("scan", result)
+
+        except socket.error:
+            if self.method == ScanMethod.UDP:
+                result["stat"] = ScanStatus.CLOSED_FILTERED
+            elif self.method == ScanMethod.TCP:
+                result["stat"] = ScanStatus.CLOSED
+            ports.append(result)
+            self.emit("scan", result)
+
+        finally:
+            pass
 
     def scan(self):
         ports = []
@@ -62,12 +90,16 @@ class NetPy(EventEmitter):
             self._scan(ports, self.port_start)
 
         for port in range(self.port_start, self.port_end):
-            threading.Thread(target=self._scan, args=(ports, port,)).start()
+            # threading.Thread(target=self._scan, args=(ports, port,)).start()
+            self._scan(ports, port)
             time.sleep(0.1)
             count += 1
 
-        while not (len(ports) >= count):
-            time.sleep(0.1)
+        # while len(ports) != count:
+        #     time.sleep(0.1)
+
+        self.emit("scan_end", ports)
+        self.stop()
 
         return ports
 
@@ -107,9 +139,12 @@ class NetPy(EventEmitter):
         process = subprocess.Popen(['C:\\Windows\\system32\\cmd.exe', ''],
                                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        # print('connected to {}:{}'.format(self.ip, self.port_start))
-
         print(process.stdout.readline().decode())
+
+    def stop(self):
+        self.socket.close()
+        # self.process.kill()
+        self.emit("stop")
 
     def p(self, msg: str) -> str:
         return msg + " " * (self.BUFFER_SIZE - len(msg))
