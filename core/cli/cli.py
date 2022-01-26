@@ -22,7 +22,7 @@ class Cli:
         self.max_option_length = list()
         self.values = dict()
         self.position = 0
-        pass
+        self.add_argument(["-h", "--help"], "help", optional=True,type=bool, help="Show this help message and exit")
 
     def create_parser(self):
         pass
@@ -130,13 +130,14 @@ class Cli:
                 break
 
     def parse_option(self, command):
-        if command == '-h':
-            self.help()
-            sys.exit(0)
+        found = False
 
         for arg in self.args:
             for optional in arg.args:
                 if optional == command:
+                    if arg.ckecked:
+                        sys.stderr.write("dublicate option: {}\n".format(arg.name))
+                        sys.exit(1)
                     if arg.type is bool:
                         self.values[arg.name] = True
                     else:
@@ -148,7 +149,12 @@ class Cli:
                             if current_arg.positional and current_arg.position < arg.position:
                                current_arg.position += 1
                     arg.ckecked = True
+                    found = True
                     break
+
+        if not found:
+            sys.stderr.write("Invalid option: {}\n".format(command))
+            sys.exit(1)
 
     def parse_positional(self):
         found = False
@@ -156,7 +162,8 @@ class Cli:
             if arg.positional:
                 if arg.position == self.position or arg.position == (self.position - len(self.commands)):
                     if arg.ckecked:
-                        break
+                        sys.stderr.write("dublicate positional: {}\n".format(arg.name))
+                        sys.exit(1)
                     self.values[arg.name] = self.commands[self.position]
                     arg.ckecked = True
                     found = True
@@ -173,6 +180,10 @@ class Cli:
             sys.exit(0)
 
         self.parse_args(self.commands)
+
+        if self.values["help"]:
+            self.help()
+            sys.exit(0)
 
         for arg in self.args:
             if arg.required and self.values[arg.name] is None:

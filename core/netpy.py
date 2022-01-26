@@ -43,16 +43,23 @@ class NetPy(threading.Thread):
     def set_prog(self):
         self.process = subprocess.Popen(['C:\\Windows\\system32\\cmd.exe'])
 
-    def _scan(self):
-        for port in range(self.port_start, self.port_end):
-            result = self.socket.connect_ex((self.ip, port))
-            if result == 0:
-                print('port {} is open'.format(port))
-            else:
-                print('port {} is closed'.format(port))
+    def _scan(self, ports, port):
+        result = self.socket.connect_ex((self.ip, port))
+        if result == 0:
+            ports.append({"port": port,"stat": "opened"})
+        else:
+            ports.append({"port": port,"stat": "closed"})
 
     def scan(self):
-        self._scan()
+        ports = []
+        for port in range(self.port_start, self.port_end):
+            threading.Thread(target=self._scan, args=(ports, port,)).start()
+            time.sleep(0.1)
+
+        while threading.active_count() > 1:
+            time.sleep(0.1)
+
+        return ports
 
     def listen(self):
         self.socket.bind((self.ip, self.port_start))

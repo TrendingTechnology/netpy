@@ -1,5 +1,8 @@
 import os
+from termcolor import colored
 from core.cli.cli import Cli
+from core.netpy import NetPy
+
 
 cli = Cli(command=os.sys.argv[1:], name="netpy", description="more than implementation of netcat 🐱🔥")
 
@@ -10,7 +13,7 @@ cli.add_argument(args=("-p", "--port"), name="port", required=True,
                  positional=True, optional=True, position=-1, help="port to listen on")
 
 ## scan for open ports
-cli.add_argument(args=("-z", "--scan"), name="scan", required=False, default=False, help="zero-I/O mode [used for scanning]")
+cli.add_argument(args=("-z", "--scan"), name="scan", required=False, type=bool, default=False, help="zero-I/O mode [used for scanning]")
 cli.add_argument(args=("-w", "--timeout"), name="timeout", required=False, default=False, help="timeout for connects and final net reads")
 cli.add_argument(args=("-v", "--verbose"), name="verbose", required=False, default=False, help="verbose [use twice to be more verbose]")
 
@@ -35,5 +38,32 @@ cli.add_argument(args=("-pw", "--password"), name="password", required=False, de
 
 cli.run()
 
+netpy = NetPy()
+
+
+netpy.set_ip(cli.values.get("address"))
+netpy.set_port(cli.values.get("port"))
+
 if cli.values.get("listen"):
     print("listening on {}:{}".format(cli.values.get("address"), cli.values.get("port")))
+elif cli.values.get("scan"):
+    ports = netpy.scan()
+    closed = 0
+
+    print("scanning {} {}".format(cli.values.get("address"), cli.values.get("port")))
+
+    print("open ports:")
+    for port in ports:
+        stat = port.get("stat")
+        port = port.get("port")
+
+        if stat == "opened":
+            print("{} {}".format(port, colored(stat, "green")))
+
+        elif stat == "closed":
+            closed += 1
+
+    print()
+
+    print("closed ports: {}".format(closed))
+    print("{} {} ports".format(closed, colored("closed", "red")))
