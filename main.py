@@ -1,5 +1,5 @@
 import argparse
-from netpy.netpy import NetPy
+from core.netpy import NetPy
 
 
 # exmaples:

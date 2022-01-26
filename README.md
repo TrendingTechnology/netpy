@@ -19,6 +19,15 @@ more than implementation of netcat  🐱‍👤🔥
 - [ ] `allow` & `deny` specific remote IP-address.
 - [ ] Multi-Client
 
+## Structure
+
+```bash
+netpy
+    └───core
+        ├───cli
+        └───connection
+```
+
 ## Available Commands
 
 - listen mode, for inbound connects
