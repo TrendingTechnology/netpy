@@ -4,9 +4,6 @@ import sys
 import threading
 import time
 
-import tty
-
-
 class NetPy(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
