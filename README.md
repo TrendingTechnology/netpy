@@ -12,7 +12,7 @@ more than implementation of netcat  🐱‍👤🔥
 - [ ] Port forwarding
 - [ ] Proxy
 - [ ] Web Server
-- [ ] Port scanning
+- [X] Port scanning
 - [ ] Authentication
 - [ ] Middelware
 - [ ] Encription Connection
