@@ -18,6 +18,7 @@ more than implementation of netcat  🐱‍👤🔥
 - [ ] Encription Connection
 - [ ] `allow` & `deny` specific remote IP-address.
 - [ ] Multi-Client
+- [X] Build-in custom CLI
 
 ## Structure
 
