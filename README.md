@@ -3,19 +3,19 @@ more than implementation of netcat  🐱‍👤🔥
 
 
 ## Featutres 💻
-[] core written in `C`
-[] TCP & UDP
-[] Backdoor (Reverse Shell)
-[] Honeypot
-[] File transfer
-[] Port forwarding
-[] Proxy
-[] Web Server
-[] Port scanning
-[] Authentication
-[] Middelware
-[] Encription Connection
-[] `allow` & `deny` specific remote IP-address.
+- [] core written in `C`
+- [] TCP & UDP
+- [] Backdoor (Reverse Shell)
+- [] Honeypot
+- [] File transfer
+- [] Port forwarding
+- [] Proxy
+- [] Web Server
+- [] Port scanning
+- [] Authentication
+- [] Middelware
+- [] Encription Connection
+- [] `allow` & `deny` specific remote IP-address.
 
 
 ## Available Commands:
