@@ -48,3 +48,9 @@ netpy -1.2.3.4 5676
 ```bash
 netpy -v -e '/bin/bash' -l -p 1234 -t
 ```
+
+- Scan range of ports from 80 to 127
+
+```bash
+netpy -z 127.0.0.1 80-127
+```

@@ -47,23 +47,19 @@ netpy.set_port(cli.values.get("port"))
 if cli.values.get("listen"):
     print("listening on {}:{}".format(cli.values.get("address"), cli.values.get("port")))
 elif cli.values.get("scan"):
-    ports = netpy.scan()
-    closed = 0
 
     print("scanning {} {}".format(cli.values.get("address"), cli.values.get("port")))
 
-    print("open ports:")
-    for port in ports:
+    @netpy.on("scan")
+    def log_ports(port):
         stat = port.get("stat")
         port = port.get("port")
 
         if stat == "opened":
             print("{} {}".format(port, colored(stat, "green")))
-
         elif stat == "closed":
-            closed += 1
+            pass
 
-    print()
+    ports = netpy.scan()
 
-    print("closed ports: {}".format(closed))
-    print("{} {} ports".format(closed, colored("closed", "red")))
+    print("{} {} ports".format(len([port for port in ports if port.get("stat") == "closed"]), colored("closed", "red")))

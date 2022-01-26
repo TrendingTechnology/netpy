@@ -3,10 +3,12 @@ import subprocess
 import sys
 import threading
 import time
+from pymitter import EventEmitter
 
-class NetPy(threading.Thread):
+
+class NetPy(EventEmitter):
     def __init__(self):
-        threading.Thread.__init__(self)
+        super().__init__()
         self.port = 0
         self.ports = []
         self.ip = "0.0.0.0"
@@ -47,16 +49,24 @@ class NetPy(threading.Thread):
         result = self.socket.connect_ex((self.ip, port))
         if result == 0:
             ports.append({"port": port,"stat": "opened"})
+            self.emit("scan", {"port": port, "stat": "opened"})
         else:
             ports.append({"port": port,"stat": "closed"})
+            self.emit("scan", {"port": port, "stat": "closed"})
 
     def scan(self):
         ports = []
+        count = 0
+
+        if self.port_start == self.port_end:
+            self._scan(ports, self.port_start)
+
         for port in range(self.port_start, self.port_end):
             threading.Thread(target=self._scan, args=(ports, port,)).start()
             time.sleep(0.1)
+            count += 1
 
-        while threading.active_count() > 1:
+        while not (len(ports) >= count):
             time.sleep(0.1)
 
         return ports
