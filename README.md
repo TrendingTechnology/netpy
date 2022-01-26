@@ -1,6 +1,6 @@
 # netpy
 
-more than implementation of netcat  🐱‍👤🔥
+more than implementation of netcat  🐍🔥
 
 ## Featutres 💻
 
